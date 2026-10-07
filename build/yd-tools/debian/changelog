@@ -1,3 +1,12 @@
+yd-tools (1.12.4) jammy; urgency=medium
+  * Changes:
+    - tray status icons are resolved through the system icon theme
+    - new symbolic status icons (light/dark aware)
+    - drop "Prefer light icon theme" and PNG/SVG icon type settings
+
+
+ -- Artem Proskurnev <temap@mail.ru>  Wed, 07 Oct 2026 12:32:12 +0300
+
 yd-tools (1.12.3) jammy; urgency=medium
   * Changes:
     - new icons
