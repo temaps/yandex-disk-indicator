@@ -159,8 +159,6 @@ class Indicator(YDDaemon):
         self.ind = appIndicator.Indicator.new(id, "", appIndicator.IndicatorCategory.APPLICATION_STATUS)
         # Create staff for icons
         self.icons = Icons(title, self.ind.set_icon_full)
-        # Setup icons theme
-        self.icons.set_theme(APP_CONF['theme'])
         self.ind.set_title(title=title)
         self.ind.set_status(appIndicator.IndicatorStatus.ACTIVE)
         self.menu = self.Menu(self, ID)               # Create menu for daemon
@@ -403,8 +401,9 @@ class Icons:                        # Icons class for icons handling
         self.timer = Timer(777, self.animation, start=False)
         self.icons = {}
         self.status = 'none'
-        self.ext = "svg"
-        self.theme = ""
+        self.update_names()
+        # Re-resolve status icons when the system icon theme changes
+        Gtk.IconTheme.get_default().connect('changed', self.on_icon_theme_changed)
 
 
     def animation(self):          # Changes busy icon by loop (triggered by self.timer)
@@ -427,32 +426,34 @@ class Icons:                        # Icons class for icons handling
         self.status = status
 
 
-    def set_theme(self, theme: bool):
-        # Determine paths to icons according to current theme
-        # global APP_INST_PATH, APP_CONF_PATH
-        self.theme = 'light' if theme else 'dark'
-        # Determine theme from application configuration settings
-        default_path = pathJoin(APP_INST_PATH, 'icons', self.theme)
-        user_path = pathJoin(APP_CONF_PATH, 'icons', self.theme)
-        def set_icon (file_name: str):
-            user_icon = pathJoin(user_path, file_name)
-            return user_icon if pathExists(user_icon) else pathJoin(default_path, file_name)
-        # Set appropriate paths to all status icons
+    def update_names(self):
+        # Status icons are passed to the indicator by name: the tray host (e.g.
+        # Plasma) resolves them through the current icon theme itself and can
+        # recolor them according to the light/dark palette. The lookup below
+        # only verifies that a name is resolvable (the package installs the
+        # default set in hicolor).
+        theme = Gtk.IconTheme.get_default()
+
+        def lookup(name: str) -> str:
+            return name if theme.lookup_icon(name, 22, 0) is not None else ''
+
+        # Set appropriate names to all status icons
         # Five busy icons are shown in endless loop
-        self.icons = {'busy': [set_icon(f"yd-busy{i}.{self.ext}") for i in range(1, 6)]}
+        self.icons = {'busy': [lookup(f'yd-busy{i}') for i in range(1, 6)]}
         # Other icons is set for all individual status
         for status in ['idle', 'error', 'paused', 'none', 'no_net']:
-            self.icons[status] = set_icon(f'yd-pause.{self.ext}' if status in {'paused', 'none', 'no_net'} else f'yd-{status}.{self.ext}')
-        # renew icon according the selected theme
-        self.set(self.status)
-        global APP_LOGO
-        APP_LOGO = Pixbuf.new_from_file(set_icon(f"yd-logo.{self.ext}"))
+            self.icons[status] = lookup('yd-ind-pause' if status in {'paused', 'none', 'no_net'} else f'yd-ind-{status}')
         LOGGER.debug(f"selected icons: {self.icons}")
 
 
-    def set_type(self, ext: bool):
-        self.ext = "png" if ext else "svg"
-        self.set_theme(self.theme=='light')
+    def on_icon_theme_changed(self, theme):
+        # NOTE: icon lookups made directly in the 'changed' handler can return
+        # stale results, so the actual refresh is postponed to the main loop
+        # idle time.
+        def do_refresh():
+            self.update_names()
+            self.set(self.status)
+        idle_add(do_refresh)
 
 
     def close(self):
@@ -561,8 +562,6 @@ class Preferences(Gtk.Dialog):
         cb = []
         for key, msg in [('autostart', _('Start Yandex.Disk indicator when you start your computer')),
                          ('notifications', _('Show on-screen notifications')),
-                         ('theme', _('Prefer light icon theme')),
-                         ('type', 'PNG-on/SVG-off'),
                          ('fmextensions', _('Activate file manager extensions'))]:
             cb.append(Gtk.CheckButton(label=msg))
             cb[-1].set_active(APP_CONF[key])
@@ -638,13 +637,7 @@ class Preferences(Gtk.Dialog):
         else:
             APP_CONF.changed = True                   # Update application config
             APP_CONF[key] = toggleState
-        if key == 'theme':
-            for i in APP_INDICATORS:                  # Update all APP_INDICATORS' icons
-                i.icons.set_theme(toggleState)           # Update icon theme
-        elif key == 'type':
-            for i in APP_INDICATORS:
-                i.icons.set_type(toggleState)
-        elif key == 'autostart':
+        if key == 'autostart':
             if toggleState:
                 copyFile(APP_AUTOSTART_SRC, APP_AUTOSTART_DST)
             else:
@@ -680,6 +673,8 @@ if __name__ == '__main__':
     # Define .desktop files locations for indicator auto-start facility
     APP_AUTOSTART_SRC = '/usr/share/applications/Yandex.Disk-indicator.desktop'
     APP_AUTOSTART_DST = expanduser('~/.config/autostart/Yandex.Disk-indicator.desktop')
+    # Logo for notifications and dialog windows (PNG: GdkPixbuf has no guaranteed SVG loader)
+    APP_LOGO = Pixbuf.new_from_file(pathJoin(APP_INST_PATH, 'icons', 'yd-logo.png'))
 
     # Get command line arguments or their default values
     args = argParse(APP_VER)
@@ -697,7 +692,7 @@ if __name__ == '__main__':
     # This file can contain comments (line starts with '#') and config values in
     # form: key=value[,value[,value ...]] where keys and values can be quoted ("...") or not.
     # The following key words are reserved for configuration:
-    #   autostart, notifications, theme, fmextensions and daemons.
+    #   autostart, notifications, fmextensions and daemons.
 
     # The dictionary 'config' stores the config settings for usage in code. Its values are saved to
     # config file on exit from the Menu.Preferences dialogue or when there is no configuration file
@@ -717,20 +712,17 @@ if __name__ == '__main__':
     APP_CONF['autostart'] = checkAutoStart(APP_AUTOSTART_DST)
     # Setup on-screen notification settings from config value
     APP_CONF.setdefault('notifications', True)
-    APP_CONF.setdefault('theme', False)
-    APP_CONF.setdefault('type', False)
     APP_CONF.setdefault('fmextensions', True)
     APP_CONF.setdefault('daemons', '~/.config/yandex-disk/config.cfg')
+    # Drop obsolete settings: icon variant is now decided by the desktop theme
+    APP_CONF.pop('theme', None)
+    APP_CONF.pop('type', None)
     # Is it a first run?
     if not APP_CONF.readSuccess:
         LOGGER.info('No config, probably it is a first run.')
-        # Create application config folders in ~/.config
+        # Create application config folder in ~/.config
         try:
             makeDirs(APP_CONF_PATH)
-            makeDirs(pathJoin(APP_CONF_PATH, 'icons/light'))
-            makeDirs(pathJoin(APP_CONF_PATH, 'icons/dark'))
-            # Copy icon themes readme to user config catalogue
-            copyFile(pathJoin(APP_INST_PATH, 'icons/readme'), pathJoin(APP_CONF_PATH, 'icons/readme'))
         except:
             sysExit(_('Can\'t create configuration files in %s') % APP_CONF_PATH)
         # Activate indicator automatic start on system start-up

@@ -1,19 +1,31 @@
-Icons themes are used to display the indicator status.
-There are two themes into two folders:
-  dark - for dark panel
-  light - for light panel
-Each theme should provide the following set of icons:
-  yd-logo.png - is used into notifications and into About dialogue
-  yd-idle.png - displayed when Yandex.disk is synchronized
-  yd-pause.png - displayed when Yandex.disk daemon not started or synchronization is paused
-  yd-error.png - displayed when some error occurs in synchronisation
-  yd-busy[1-5].png - set of icons to indicate the synchronization process.
-Icons yd-busy[1-5].png are displayed into a loop (to provide animated icon):
+Status icons are addressed by NAME and resolved through the system icon
+theme by the tray host itself. The package installs the default set into
+the 'hicolor' fallback theme (see the hicolor/ folder):
 
-  /--> yd-busy1.png --> yd-busy2.png --> yd-busy3.png ->\
- |                                                       |
-  \--------- yd-busy5.png <-- yd-busy4.png <------------/
+  hicolor/22x22/status/yd-ind-idle.svg    - Yandex.Disk is synchronized
+  hicolor/22x22/status/yd-ind-pause.svg   - daemon not started, paused or no network
+  hicolor/22x22/status/yd-ind-error.svg   - an error occurs in synchronization
+  hicolor/22x22/status/yd-busy[1-5].svg   - synchronization in progress
 
-NOTE: you can redefine some or all icons (ex. yd-ind-error.png) by placing
-necessary icon into ~/.config/yd-tools/icons/<theme>. When icon isn't found ~/.config/yd-tools/icons/<theme>
-then the default icon is used
+Icons yd-busy1..5 are shown in a loop (animated icon):
+
+  /--> yd-busy1 --> yd-busy2 --> yd-busy3 ->\
+ |                                           |
+  \--------- yd-busy5 <-- yd-busy4 <--------/
+
+The status SVGs are symbolic: they use the "current-color-scheme" style
+classes (ColorScheme-Text / ColorScheme-NegativeText), so desktops like
+KDE Plasma recolor them automatically to follow the light/dark palette.
+
+hicolor/scalable/apps/yd-logo.svg is the application icon for launchers
+and menus. dark/yd-logo.png is installed as /usr/share/yd-tools/icons/yd-logo.png
+only to be embedded into notifications and dialogs, because GdkPixbuf has
+no guaranteed SVG loader.
+
+The dark/ and light/ folders keep the legacy icon sets (upstream 1.12.x);
+they are not installed anymore.
+
+NOTE: to change the icons shown in the tray, provide your own variants under
+the same names with your icon theme (Context=Status), for example:
+  /usr/share/icons/<theme>/22x22/status/yd-ind-idle.svg
+  ~/.icons/<theme>/22x22/status/yd-busy1.svg

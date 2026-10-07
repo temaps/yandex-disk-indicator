@@ -18,6 +18,7 @@
 .SH DESCRIPTION
 \fByandex-disk-indicator\fP is an aplication indicator that shows Yandex.Disk synchronization status and allows start and stop synchronization daemon, change it configuration, and see the list of last synchronized items.
 Changes of synchronization status are shown via different icons and via desktop notification messages.
+Status icons are resolved through the system icon theme (installed in hicolor), so the current theme determines their variant.
 .PP
 \fByandex-disk-indicator\fP allow to use several Yandex.Disk accounts. It shows such number of icons as many daemons are configured.
 .PP
@@ -96,7 +97,6 @@ Flie ~/.config/yd-tools/\fByandex-disk-indicator\fP cotains the indicator settin
     autostart     Enables or disables indicator auto-start on the 
                   system start-up.
     notifications Enables or disables desktop notification messages.
-    theme         True for ligtn icon theme, false - dark theme.
     fmextensions  Enables or disables file manager extension activation.
     daemons       List of daemon configuration files.
 

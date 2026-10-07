@@ -1,4 +1,4 @@
-### **![yandex-disk-indicator](https://github.com/slytomcat/yandex-disk-indicator/blob/master/icons/dark/yd-logo.png)**
+### **![yandex-disk-indicator](icons/dark/yd-logo.png)**
 # yandex-disk-indicator
 [![license](https://img.shields.io/badge/license-GPL%20v.3-green.svg)](https://github.com/slytomcat/yandex-disk-indicator/blob/master/LICENSE)
 [![wiki](https://img.shields.io/badge/wiki-available-green.svg)](https://github.com/slytomcat/yandex-disk-indicator/wiki)
@@ -27,7 +27,8 @@ English, Russian, Greek, Bulgarian, Belorussian.
 
 Indicator code assumes that:
 - `yandex-disk-indicator` is copied to `/usr/bin/yandex-disk-indicator` and marked as executable (chmod a+x ...)
-- `fm-actions/` and `icons/` folders, `ya-setup` and `*.py` files are located in `/usr/share/yd-tools` folder
+- `fm-actions/` folder, `ya-setup` and `*.py` files are located in `/usr/share/yd-tools` folder (the notification logo in `/usr/share/yd-tools/icons/`)
+- tray status icons (`yd-ind-*`, `yd-busy*`) and the application icon (`yd-logo`) are installed into the `hicolor` fallback icon theme, so the active system icon theme (light/dark variant included) determines which icons are shown; themes can override them or a user can put custom ones into `~/.icons/<theme>/`
 - `*.desktop` files were placed in `/usr/share/applications` folder
 - compiled language files (`translations/*.mo`) are located in the system depended folders (i.e. `usr/share/locale/{LANG}/LC_MESSAGES/` in Linux)
 - `ya-setup` utility translations files (`translations/ya-setup*.lang`) are located in `/usr/share/yd-tools/translation` folder
