@@ -17,13 +17,9 @@ The status SVGs are symbolic: they use the "current-color-scheme" style
 classes (ColorScheme-Text / ColorScheme-NegativeText), so desktops like
 KDE Plasma recolor them automatically to follow the light/dark palette.
 
-hicolor/scalable/apps/yd-logo.svg is the application icon for launchers
-and menus. dark/yd-logo.png is installed as /usr/share/yd-tools/icons/yd-logo.png
-only to be embedded into notifications and dialogs, because GdkPixbuf has
-no guaranteed SVG loader.
-
-The dark/ and light/ folders keep the legacy icon sets (upstream 1.12.x);
-they are not installed anymore.
+hicolor/scalable/apps/yd-logo.svg is the application icon for launchers,
+menus, notifications and dialog windows (it is resolved by name through
+the icon theme everywhere).
 
 NOTE: to change the icons shown in the tray, provide your own variants under
 the same names with your icon theme (Context=Status), for example:

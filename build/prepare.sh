@@ -11,7 +11,6 @@ mkdir -p $TARGET/share/locale/be/LC_MESSAGES
 mkdir -p $TARGET/share/yd-tools/fm-actions/Dolphin
 mkdir -p $TARGET/share/yd-tools/fm-actions/Nautilus_Nemo
 mkdir -p $TARGET/share/yd-tools/fm-actions/pantheon-files
-mkdir -p $TARGET/share/yd-tools/icons
 mkdir -p $TARGET/share/yd-tools/translations
 mkdir -p $TARGET/share/icons/hicolor/22x22/status
 mkdir -p $TARGET/share/icons/hicolor/scalable/apps
@@ -26,8 +25,6 @@ cp ../translations/yandex-disk-indicator_bg.mo $TARGET/share/locale/bg/LC_MESSAG
 cp ../translations/yandex-disk-indicator_be.mo $TARGET/share/locale/be/LC_MESSAGES/yandex-disk-indicator.mo
 cp ../translations/*.lang $TARGET/share/yd-tools/translations/
 cp ../Yandex.Disk-indicator.desktop $TARGET/share/applications/
-# Logo for notifications and dialog windows (loaded by GdkPixbuf)
-cp ../icons/dark/yd-logo.png $TARGET/share/yd-tools/icons/yd-logo.png
 # Status tray icons (resolved by the tray host through the system icon theme)
 cp ../icons/hicolor/22x22/status/*.svg $TARGET/share/icons/hicolor/22x22/status/
 # Application icon for launchers

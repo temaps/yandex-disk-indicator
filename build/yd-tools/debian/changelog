@@ -1,3 +1,10 @@
+yd-tools (1.12.5) jammy; urgency=medium
+  * Changes:
+    - drop the PNG logo: notifications and dialog windows use the
+      yd-logo icon from the icon theme
+
+ -- Artem Proskurnev <temap@mail.ru>  Wed, 07 Oct 2026 12:32:12 +0300
+
 yd-tools (1.12.4) jammy; urgency=medium
   * Changes:
     - tray status icons are resolved through the system icon theme
